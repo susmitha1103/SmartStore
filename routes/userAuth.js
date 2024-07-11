@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const USER = require('../database/userModel');
-const { trusted } = require('mongoose');
+const { hashPassword, comparePasswords, generateToken } = require('./authServices');
 
  
-router.post('user/signup', async(req,res) =>{
+router.post('/signup', async(req,res) =>{
   const {username, password} = req.body;
   if(!username || !password || username.length < 6 || password.length < 6){
     return res.status(400).json({msg: "Username and password should contain more than 5 characters"})
@@ -14,9 +14,10 @@ router.post('user/signup', async(req,res) =>{
   if(user){
     return res.send(400).json({msg:'User already exists'});
   }
+  const hashedPassword = await hashPassword(password);
   let newUser = USER({
     username,
-    password,
+    password: hashedPassword,
     isAdmin: false,
   })
   await newUser.save();
@@ -29,17 +30,20 @@ router.post('user/signup', async(req,res) =>{
     }
   });
 
-  router.post('user/login', async(req,res) =>{
+  router.post('/login', async(req,res) =>{
     const{username, password} = req.body;
     try{
-      let existingUser = await USER.find({username});
+      let existingUser = await USER.findOne({username});
       if(!existingUser){
         return res.status(401).json({msg: "Invalid Credentials"});
       }
-      if (password !== existingUser.password) {
-        return res.status(401).json({ msg: "Invalid Credentials" });
-      }
-      res.status(200).json({msg: "User loggedin Successfully"});
+      const isMatch = await comparePasswords(password, existingUser.password);
+    if (!isMatch) {
+      return res.status(401).json({ msg: "Invalid Credentials" });
+    }
+  
+    const token = generateToken(existingUser);
+    res.status(200).json({ msg: "User logged in successfully", token });
     }
     catch(error){
       console.error(err.message);

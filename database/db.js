@@ -1,18 +1,20 @@
 const mongoose = require('mongoose');
 const path = require('path');
-require('dotenv').config({path: path.resolve(__dirname,'SmartStore', '.env')})
+
+require('dotenv').config({path: path.resolve(__dirname, '..', '.env')})
 
 const connectDB = async() =>{
+  console.log(process.env.MONGO_URI);
 
   try{
-    await mongoose.connect(process.env.mongoURI,{
+    await mongoose.connect(process.env.MONGO_URI,{
       useNewUrlParser: true,
-      useUnifiedToplogy: true
+      useUnifiedTopology: true
     });
     console.log("Connected to mongoDB")
   }
   catch(err){
-    console.error(err.message)
+    console.error("MongoDB connection error",err.message)
     process.exit(1);
    
   }
