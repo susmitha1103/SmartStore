@@ -1,7 +1,6 @@
 import React from 'react';
 import axios from 'axios';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { TextField, Button,Card, CardContent, Container, Typography } from '@mui/material';
 
 const AdminLogin = () =>{
@@ -10,24 +9,21 @@ const AdminLogin = () =>{
   const[password, setPassword] = useState('');
   const[error, setError] = useState('');
 
-  const navigate = useNavigate();
-
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/api/admin/login', {
+  const handleLogin = async() =>{
+    try{
+      const response = await axios.post('http://localhost:3000/api/admin/login',{
         username,
-        password,
+        password
       });
-      const { token } = response.data;
-      localStorage.setItem('jwtToken', token);
-      console.log('Login Successful', token);
-      navigate('/add-product');
-    } catch (error) {
+      const{token} = response.data;
+      localStorage.setItem('jwtToken',token);
+      console.log('Login Successful', token)
+    }
+    catch(error){
       console.error('There was an error!', error);
       setError('Invalid username or password.');
     }
   };
-  
   return(
     <Container
     maxWidth="xs"
@@ -74,7 +70,6 @@ const AdminLogin = () =>{
       <TextField
       label = "Password"
       value = {password}
-      type = "password"
       onChange= {(e) => setPassword(e.target.value) }
       controlled
       size = "small"
