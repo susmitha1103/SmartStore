@@ -7,10 +7,10 @@ const adminAuthentication = require('./adminMiddleware');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Define the directory to save uploaded files
+    cb(null, 'uploads/'); 
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Define the filename
+    cb(null, Date.now() + path.extname(file.originalname)); 
   }
 });
 
@@ -18,11 +18,12 @@ const upload = multer({ storage: storage });
 
 router.post('/addProduct', adminAuthentication, upload.single('image'), async (req, res) => {
   const { product_name, category, description, price, stock } = req.body;
-  const image = req.file ? req.file.path : '';
+  const image = req.file ? req.file.filename : '';
 
   console.log("Received the post req from AddProduct", req.body);
+  console.log("Uploaded file details:", req.file);
 
-  if (!product_name || !category || !description || !price || !stock) {
+  if (!product_name || !category || !description || !price || !stock || !image) {
     return res.status(400).json({ msg: 'All fields are required' });
   }
 
@@ -42,6 +43,7 @@ router.post('/addProduct', adminAuthentication, upload.single('image'), async (r
       stock,
       image,
     });
+    console.log("Saving product with image:", newProduct);
 
     await newProduct.save();
     res.json(newProduct);
@@ -50,30 +52,34 @@ router.post('/addProduct', adminAuthentication, upload.single('image'), async (r
     res.status(500).send("Problem in adding products");
   }
 });
-router.post('/update/:id',adminAuthentication, async(req,res)=>{
-  const { product_name, category, description, price, stock, image } = req.body;
-  try{
-    const product = await PRODUCT.findById(req.params.id);
-    if(!product){
-      return res.status(404).json({msg: 'product not found'});
+router.put('/update/:id', upload.single('image'), async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const updatedProductData = req.body;
+
+    console.log("received the put request form UpdateProductDetails");
+    console.log("ProductId", productId);
+    console.log("received updates", updatedProductData)
+
+    if (req.file) {
+      console.log("Received file for image: ", req.file.filename);
+      updatedProductData.image = req.file.filename;
+    } else {
+      console.log("No file received");
     }
-    //update the products
-    product.product_name = product_name || product.product_name;
-    product.category = category || product.category;
-    product.description = description || product.description;
-    product.price = price || product.price;
-    product.stock = stock || product.stock;
-    product.Image = image || product.Image;
-
-    // Save the updated product
-    await product.save();
-
-    res.json({ msg: 'Product updated successfully', product });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  } 
+    
+    const updatedProduct = await PRODUCT.findByIdAndUpdate(productId, updatedProductData, { new: true });
+    if (!updatedProduct) {
+      console.log("product not found during update attempt");
+      return res.status(404).json({ msg: 'Product not found' });
+    }
+    return res.status(200).json({ msg: 'Product updated successfully', product: updatedProduct });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return res.status(500).json({ msg: 'Product update failed', error: error.message });
+  }
 });
+
 router.delete('/removeProduct/:id', adminAuthentication, async (req, res) => {
   try {
     const product = await PRODUCT.findByIdAndDelete(req.params.id);
@@ -101,6 +107,15 @@ router.get('/:id', async(req,res) =>{
       return res.status(404).json({ msg: 'Product not found' });
     }
     res.status(500).send('Server error');
+  }
+});
+router.get('/', async (req, res) => {
+  try {
+    const products = await PRODUCT.find();
+    console.log(products);
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching products", error });
   }
 });
 
