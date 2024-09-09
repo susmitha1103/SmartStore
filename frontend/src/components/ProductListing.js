@@ -7,6 +7,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
+import UpdateProductDetails from './Admin/UpdateProductDetails'; 
 
 const ProductListing = () => {
   const [products, setProducts] = useState([]);
@@ -29,6 +30,12 @@ const ProductListing = () => {
     fetchProducts();
   }, []);
 
+  const handleProductUpdate = (updatedProduct) => {
+    setProducts(products.map((product) => 
+      product._id === updatedProduct._id ? updatedProduct : product
+    ));
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -38,7 +45,7 @@ const ProductListing = () => {
   }
 
   return (
-    <div style={{ padding: '3rem' }}> 
+    <div style={{ padding: '3rem' }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Product Listing
       </Typography>
@@ -47,14 +54,14 @@ const ProductListing = () => {
           const imageUrl = `http://localhost:3000/uploads/${product.image}`;
           return (
             <Grid item xs={12} sm={6} md={4} key={product._id}>
-              <Card style={{ height: '100%' }}> 
+              <Card style={{ height: '100%' }}>
                 <CardActionArea component={Link} to={`/products/${product._id}`}>
                   <CardMedia
                     component="img"
                     height="140"
                     image={imageUrl}
                     alt={product.product_name}
-                    style={{ objectFit: 'cover' }} 
+                    style={{ objectFit: 'cover' }}
                   />
                   <CardContent>
                     <Typography variant="h5" component="h2">
@@ -71,6 +78,12 @@ const ProductListing = () => {
                     </Typography>
                   </CardContent>
                 </CardActionArea>
+
+                
+                <CardContent>
+                  <UpdateProductDetails product={product}
+                  onUpdate={handleProductUpdate} />
+                </CardContent>
               </Card>
             </Grid>
           );
@@ -79,4 +92,5 @@ const ProductListing = () => {
     </div>
   );
 };
+
 export default ProductListing;
