@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import UpdateProductDetails from './Admin/UpdateProductDetails'; 
+import DeleteProduct from './DeleteProduct';
 
 const ProductListing = () => {
   const [products, setProducts] = useState([]);
@@ -34,6 +35,10 @@ const ProductListing = () => {
     setProducts(products.map((product) => 
       product._id === updatedProduct._id ? updatedProduct : product
     ));
+  };
+
+  const handleDeleteProduct = (productId) => {
+    setProducts(products.filter((product) => product._id !== productId)); // Remove deleted product from UI
   };
 
   if (loading) {
@@ -80,9 +85,15 @@ const ProductListing = () => {
                 </CardActionArea>
 
                 
-                <CardContent>
+                <CardContent
+                 style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
                   <UpdateProductDetails product={product}
                   onUpdate={handleProductUpdate} />
+                  <DeleteProduct productId={product._id} onDelete={handleDeleteProduct} />
                 </CardContent>
               </Card>
             </Grid>
