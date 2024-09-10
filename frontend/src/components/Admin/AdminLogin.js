@@ -7,9 +7,28 @@ const AdminLogin = ({setIsLoggedIn}) =>{
 
   const[username, setUsername] = useState('');
   const[password, setPassword] = useState('');
+  const[usernameError, setUsernameError] = useState(false);
+  const[passwordError, setPasswordError] = useState(false);
   const[error, setError] = useState('');
 
-  const handleLogin = async({}) =>{
+  const handleLogin = async() =>{
+
+    setUsernameError(false);
+    setPasswordError(false);
+    setError('');
+
+    let hasError = false;
+
+    if (!username) {
+      setUsernameError(true);
+      hasError = true;
+    }
+    if (!password) {
+      setPasswordError(true);
+      hasError = true;
+    }
+
+    if (hasError) return;
     try{
       const response = await axios.post('http://localhost:3000/api/admin/login',{
         username,
@@ -65,6 +84,8 @@ const AdminLogin = ({setIsLoggedIn}) =>{
         onChange={(e) => setUsername(e.target.value)}
         size = "small"
         margin = "normal"
+        error={usernameError}
+            helperText={usernameError ? 'Username is required' : ''}
       />
       <TextField
       label = "Password"
@@ -73,7 +94,10 @@ const AdminLogin = ({setIsLoggedIn}) =>{
       onChange= {(e) => setPassword(e.target.value) }
       size = "small"
       margin = "normal" 
+      error={passwordError}
+            helperText={passwordError ? 'Password is required' : ''}
       />
+      {error && <Typography color="error" sx={{ marginTop: 2 }}>{error}</Typography>}
       <Button variant = "contained" color = "primary" onClick={handleLogin}
       sx ={{
         marginTop : 2
