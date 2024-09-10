@@ -80,18 +80,21 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
   }
 });
 
-router.delete('/removeProduct/:id', adminAuthentication, async (req, res) => {
+
+router.delete('/deleteProduct/:id', async (req, res) => {
   try {
-    const product = await PRODUCT.findByIdAndDelete(req.params.id);
-    if (!product) {
+    const productId = req.params.id;
+    const deletedProduct = await PRODUCT.findByIdAndDelete(productId);
+    if (!deletedProduct) {
       return res.status(404).json({ msg: 'Product not found' });
     }
-    res.json({ msg: 'Product removed successfully' });
+    res.json({ msg: 'Product deleted successfully' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
+
 router.get('/:id', async(req,res) =>{
   console.log("At get product by id");
   try{
