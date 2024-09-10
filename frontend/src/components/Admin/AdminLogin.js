@@ -3,13 +3,13 @@ import axios from 'axios';
 import { useState } from 'react';
 import { TextField, Button,Card, CardContent, Container, Typography } from '@mui/material';
 
-const AdminLogin = () =>{
+const AdminLogin = ({setIsLoggedIn}) =>{
 
   const[username, setUsername] = useState('');
   const[password, setPassword] = useState('');
   const[error, setError] = useState('');
 
-  const handleLogin = async() =>{
+  const handleLogin = async({}) =>{
     try{
       const response = await axios.post('http://localhost:3000/api/admin/login',{
         username,
@@ -17,6 +17,7 @@ const AdminLogin = () =>{
       });
       const{token} = response.data;
       localStorage.setItem('jwtToken',token);
+      setIsLoggedIn(true); 
       console.log('Login Successful', token)
     }
     catch(error){
@@ -28,7 +29,6 @@ const AdminLogin = () =>{
     <Container
     maxWidth="xs"
       sx={{
-        
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -63,15 +63,14 @@ const AdminLogin = () =>{
         label = "Username"
         value = {username}
         onChange={(e) => setUsername(e.target.value)}
-        controlled
         size = "small"
         margin = "normal"
       />
       <TextField
       label = "Password"
+      type = "password"
       value = {password}
       onChange= {(e) => setPassword(e.target.value) }
-      controlled
       size = "small"
       margin = "normal" 
       />

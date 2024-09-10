@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, Container, Typography } from '@mui/material';
+import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const AddProduct = () => {
+  const navigate = useNavigate();
   const [productData, setProductData] = useState({
     product_name: '',
     category: '',
@@ -11,6 +13,7 @@ const AddProduct = () => {
     stock: '',
     image: null,
   });
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,7 +31,7 @@ const AddProduct = () => {
         [name]: files[0],
       }));
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,35 +43,44 @@ const AddProduct = () => {
     formData.append('price', productData.price);
     formData.append('stock', productData.stock);
     formData.append('image', productData.image);
+
     try {
       const response = await axios.post('http://localhost:3000/api/products/addProduct', formData, {
         headers: {
-          'Authorization' : `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
-      if (response.data) {
-        alert("Product added successfully");
+
+      if (response.status === 200) {
+        alert('Product added successfully');
+        navigate('/products');
+        resetForm();
       }
-      setProductData({
-        product_name: '',
-        category: '',
-        description: '',
-        price: '',
-        stock: '',
-        image: null,
-      });
     } catch (error) {
       console.error('Error adding product', error);
-      alert('Failed to add product');
+      setError('Failed to add product. Please try again.');
     }
+  };
+
+  const resetForm = () => {
+    setProductData({
+      product_name: '',
+      category: '',
+      description: '',
+      price: '',
+      stock: '',
+      image: null,
+    });
   };
 
   return (
     <Container sx={{ maxWidth: 600, mt: 4 }}>
       <Typography variant="h4" gutterBottom>Add New Product</Typography>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {error && <Typography color="error">{error}</Typography>}
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <TextField
+          id="product_name"
           name="product_name"
           label="Product Name"
           variant="outlined"
@@ -77,6 +89,7 @@ const AddProduct = () => {
           required
         />
         <TextField
+          id="category"
           name="category"
           label="Category"
           variant="outlined"
@@ -85,6 +98,7 @@ const AddProduct = () => {
           required
         />
         <TextField
+          id="description"
           name="description"
           label="Description"
           variant="outlined"
@@ -95,6 +109,7 @@ const AddProduct = () => {
           required
         />
         <TextField
+          id="price"
           name="price"
           label="Price"
           variant="outlined"
@@ -104,6 +119,7 @@ const AddProduct = () => {
           required
         />
         <TextField
+          id="stock"
           name="stock"
           label="Stock"
           variant="outlined"
@@ -113,6 +129,7 @@ const AddProduct = () => {
           required
         />
         <input
+          id="image"
           name="image"
           type="file"
           onChange={handleImageChange}
@@ -125,7 +142,7 @@ const AddProduct = () => {
         >
           Add Product
         </Button>
-      </form>
+      </Box>
     </Container>
   );
 };
