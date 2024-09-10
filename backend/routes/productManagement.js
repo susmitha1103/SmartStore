@@ -52,7 +52,7 @@ router.post('/addProduct', adminAuthentication, upload.single('image'), async (r
     res.status(500).send("Problem in adding products");
   }
 });
-router.put('/update/:id', upload.single('image'), async (req, res) => {
+router.put('/update/:id',adminAuthentication, upload.single('image'), async (req, res) => {
   try {
     const productId = req.params.id;
     const updatedProductData = req.body;
@@ -81,7 +81,7 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
 });
 
 
-router.delete('/deleteProduct/:id', async (req, res) => {
+router.delete('/deleteProduct/:id',adminAuthentication, async (req, res) => {
   try {
     const productId = req.params.id;
     const deletedProduct = await PRODUCT.findByIdAndDelete(productId);
@@ -95,7 +95,7 @@ router.delete('/deleteProduct/:id', async (req, res) => {
   }
 });
 
-router.get('/:id', async(req,res) =>{
+router.get('/:id',adminAuthentication, async(req,res) =>{
   console.log("At get product by id");
   try{
     const product = await PRODUCT.findById(req.params.id);
@@ -112,7 +112,7 @@ router.get('/:id', async(req,res) =>{
     res.status(500).send('Server error');
   }
 });
-router.get('/', async (req, res) => {
+router.get('/',adminAuthentication, async (req, res) => {
   try {
     const products = await PRODUCT.find();
     console.log(products);
