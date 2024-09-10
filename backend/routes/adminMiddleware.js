@@ -1,24 +1,32 @@
 const jwt = require('jsonwebtoken');
 const path = require('path');
-require('dotenv').config({path: path.resolve(__dirname, '..', '.env')});
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
-const adminAuthentication = (req,res, next) =>{
-  const token = req.header('Authorization').replace('Bearer ', '');
-  if(!token){
-    return res.status(401).json({msg:'No token, authorization denied'});
+const adminAuthentication = (req, res, next) => {
+  const authHeader = req.header('Authorization');
+  
+  // Check if Authorization header is provided
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log("No token provided or incorrect token",authHeader)
+    return res.status(401).json({ msg: 'No token, authorization denied' });
   }
-  try{
+
+  // Extract the token
+  const token = authHeader.replace('Bearer ', '');
+  console.log('Extracted Token:', token);
+
+  try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if(!decoded || !decoded.isAdmin){
-      return res.status(401).json({msg: 'Admin resource, access denied'});
+    
+    // Check if the user is an admin
+    if (!decoded || !decoded.isAdmin) {
+      return res.status(403).json({ msg: 'Admin resource, access denied' });
     }
     req.user = decoded;
     next();
-  }
-  catch (err) {
+  } catch (err) {
     res.status(401).json({ msg: 'Token is not valid' });
   }
-;}
+};
 
 module.exports = adminAuthentication;
-
