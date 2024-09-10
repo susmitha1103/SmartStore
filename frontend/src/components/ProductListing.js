@@ -18,7 +18,14 @@ const ProductListing = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/products/');
+        const token = localStorage.getItem('jwtToken');
+        
+        const response = await axios.get('http://localhost:3000/api/products/', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
         setProducts(response.data);
         setLoading(false);
       } catch (err) {

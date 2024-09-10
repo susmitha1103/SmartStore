@@ -29,7 +29,7 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
     }
   };
   
-  const handleUpdate = () => {
+  const handleUpdate =async() => {
     const formData = new FormData();
     formData.append('product_name', productData.product_name);
     formData.append('category', productData.category);
@@ -42,22 +42,22 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
       formData.append('image', selectedImage);
     }
 
-    axios
-      .put(`http://localhost:3000/api/products/update/${product._id}`, formData, {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const response = await axios.put(`http://localhost:3000/api/products/update/${product._id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
         },
-      })
-      .then((response) => {
-        alert('Product updated successfully!');
-        //update the ui without refresh
-        onUpdate(response.data.product);
-        setOpen(false); 
-      })
-      .catch((error) => {
-        console.error('Error updating product', error);
-        alert('Failed to update product');
       });
+      alert('Product updated successfully!');
+      // Update the UI without refresh
+      onUpdate(response.data.product);
+      setOpen(false);
+    } catch (error) {
+      console.error('Error updating product', error);
+      alert('Failed to update product');
+    }
   };
 
   const handleClickOpen = () => {

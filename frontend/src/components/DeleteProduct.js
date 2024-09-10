@@ -7,7 +7,12 @@ const DeleteProduct = ({ productId, onDelete }) => {
     try {
       const confirmDelete = window.confirm("Are you sure you want to delete this product?");
       if (confirmDelete) {
-        await axios.delete(`http://localhost:3000/api/products/deleteProduct/${productId}`);
+        const token = localStorage.getItem('jwtToken');
+        await axios.delete(`http://localhost:3000/api/products/deleteProduct/${productId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         alert("Product deleted successfully!");
         onDelete(productId); // Callback to remove the deleted product from the UI
       }
