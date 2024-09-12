@@ -17,27 +17,26 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post('/addProduct', adminAuthentication, upload.single('image'), async (req, res) => {
-  const { product_name, category, description, price, stock } = req.body;
+  const { product_name, subcategory, category, description, price, stock } = req.body;
   const image = req.file ? req.file.filename : '';
 
   console.log("Received the post req from AddProduct", req.body);
   console.log("Uploaded file details:", req.file);
 
-  if (!product_name || !category || !description || !price || !stock || !image) {
+  if (!category || !subcategory ||!product_name || !description || !price || !stock || !image) {
     return res.status(400).json({ msg: 'All fields are required' });
   }
 
   try {
-    // Check if the product already exists
     const existingProduct = await PRODUCT.findOne({ product_name });
     if (existingProduct) {
       return res.status(400).json({ msg: 'Product already exists' });
     }
 
-    // Create a new product if not a duplicate
     let newProduct = new PRODUCT({
-      product_name,
       category,
+      subcategory,
+      product_name,
       description,
       price,
       stock,

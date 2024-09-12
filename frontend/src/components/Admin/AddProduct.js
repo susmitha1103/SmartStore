@@ -3,17 +3,25 @@ import axios from 'axios';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+
 const AddProduct = () => {
   const navigate = useNavigate();
   const [productData, setProductData] = useState({
-    product_name: '',
     category: '',
+    product_name: '',
+    subcategory: '',
     description: '',
     price: '',
     stock: '',
     image: null,
   });
   const [error, setError] = useState('');
+  const [categoryError, setCategoryError] = useState(false);
+  const [subcategoryError, setSubcategoryError] = useState(false);
+  const [productNameError, setProductNameError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
+  const [priceError, setPriceError] = useState(false);
+  const [stockError, setStockError] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,8 +45,52 @@ const AddProduct = () => {
     e.preventDefault();
     const token = localStorage.getItem('jwtToken');
     const formData = new FormData();
-    formData.append('product_name', productData.product_name);
+
+    setCategoryError(false);
+    setSubcategoryError(false);
+    setProductNameError(false);
+    setDescriptionError(false);
+    setPriceError(false);
+    setStockError(false);
+    setError('');
+
+    let hasError = false;
+
+    if(!productData.category || productData.category.length < 6 || productData.category.length >16){
+      setCategoryError(true);
+      hasError = true;
+    }
+
+    if(!productData.subcategory || productData.subcategory.length < 6 || productData.subcategory.length >16){
+      setSubcategoryError(true);
+      hasError = true;
+    }
+
+    if(!productData.product_name || productData.product_name.length < 6 || productData.product_name.length >16){
+      setProductNameError(true);
+      hasError = true;
+    }
+
+    if(!productData.description || productData.description.length < 6 || productData.description.length >45){
+      setDescriptionError(true);
+      hasError = true;
+    }
+
+    if(!productData.stock || productData.stock < 0 || productData.stock >1000){
+      setStockError(true);
+      hasError = true;
+    }
+
+    if(!productData.price || productData.price< 5 || productData.price >20000){
+      setPriceError(true);
+      hasError = true;
+    }
+
+    if (hasError) return;
+    
     formData.append('category', productData.category);
+    formData.append('subcategory', productData.subcategory);
+    formData.append('product_name', productData.product_name);
     formData.append('description', productData.description);
     formData.append('price', productData.price);
     formData.append('stock', productData.stock);
@@ -65,8 +117,9 @@ const AddProduct = () => {
 
   const resetForm = () => {
     setProductData({
-      product_name: '',
       category: '',
+      subcategory: '',
+      product_name: '',
       description: '',
       price: '',
       stock: '',
@@ -79,6 +132,28 @@ const AddProduct = () => {
       <Typography variant="h4" gutterBottom>Add New Product</Typography>
       {error && <Typography color="error">{error}</Typography>}
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <TextField
+          id="category"
+          name="category"
+          label="Category"
+          variant="outlined"
+          value={productData.category}
+          onChange={handleChange}
+          required
+          error={categoryError}
+            helperText={categoryError ? 'Category name must be between 6 and 16 characters' : ''}
+        />
+        <TextField
+          id="subcategory"
+          name="subcategory"
+          label="Sub-Category"
+          variant="outlined"
+          value={productData.subcategory}
+          onChange={handleChange}
+          required
+          error={subcategoryError}
+            helperText={subcategoryError ? 'Sub-Category name must be between 6 and 16 characters' : ''}
+        />
         <TextField
           id="product_name"
           name="product_name"
@@ -87,16 +162,10 @@ const AddProduct = () => {
           value={productData.product_name}
           onChange={handleChange}
           required
+          error={productNameError}
+            helperText={productNameError ? 'Product name must be between 6 and 16 characters' : ''}
         />
-        <TextField
-          id="category"
-          name="category"
-          label="Category"
-          variant="outlined"
-          value={productData.category}
-          onChange={handleChange}
-          required
-        />
+        
         <TextField
           id="description"
           name="description"
@@ -107,6 +176,8 @@ const AddProduct = () => {
           value={productData.description}
           onChange={handleChange}
           required
+          error={descriptionError}
+            helperText={descriptionError ? 'Description must be between 6 and 45 characters' : ''}
         />
         <TextField
           id="price"
@@ -117,6 +188,8 @@ const AddProduct = () => {
           value={productData.price}
           onChange={handleChange}
           required
+          error={priceError}
+            helperText={priceError? 'Price must be between 5 and 20000' : ''}
         />
         <TextField
           id="stock"
@@ -127,6 +200,8 @@ const AddProduct = () => {
           value={productData.stock}
           onChange={handleChange}
           required
+          error={stockError}
+            helperText={stockError? 'Stock must be between 0 and 1000' : ''}
         />
         <input
           id="image"
