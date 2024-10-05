@@ -4,8 +4,9 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import AdminLogin from './Components/Admin/AdminLogin';
 import AdminSignUp from './Components/Admin/AdminSignUp';
 import Appbar from './Components/Appbar';
-import AddProduct from './Components/Admin/AddProduct';
-import ProductListing from './Components/ProductListing';
+import AddProduct from './Components/Products/AddProduct';
+import ProductListing from './Components/Products/ProductListing';
+
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

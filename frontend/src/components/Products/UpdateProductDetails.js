@@ -1,12 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem } from '@mui/material';
 
-const UpdateProductDetails = ({ product, onUpdate}) => {
-  const [open, setOpen] = useState(false); 
-  const [productData, setProductData] = useState(product); 
+const UpdateProductDetails = ({ product, onUpdate }) => {
+  const [open, setOpen] = useState(false);
+  const [productData, setProductData] = useState(product);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(product.image ? `http://localhost:3000/uploads/${product.image}` : '');  
+  const [imagePreview, setImagePreview] = useState(product.image ? `http://localhost:3000/uploads/${product.image}` : '');
+  const [categories, setCategories] = useState([]); // Store categories
+  const [subcategories, setSubcategories] = useState([]); // Store subcategories
+
+  useEffect(() => {
+    // Fetch categories and subcategories when the component mounts
+    const fetchCategoriesAndSubcategories = async () => {
+      try {
+        const token = localStorage.getItem('jwtToken'); // Retrieve token from local storage
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}` // Include token in the headers
+          }
+        };
+        const response = await axios.get('http://localhost:3000/api/products/category/categories',config); // Use your correct endpoint
+        const { categories, subcategories } = response.data;
+        setCategories(categories);
+        setSubcategories(subcategories);
+      } catch (error) {
+        console.error('Error fetching categories and subcategories', error);
+      }
+    };
+
+    fetchCategoriesAndSubcategories();
+  }, []);
+
+  const handleCategoryChange = (event) => {
+    const selectedCategory = event.target.value;
+    setProductData({ ...productData, category: selectedCategory });
+  };
+
+  const handleSubcategoryChange = (event) => {
+    const selectedSubcategory = event.target.value;
+    setProductData({ ...productData, subcategory: selectedSubcategory });
+  };
 
   const handleInputChange = (e) => {
     setProductData({
@@ -17,7 +52,7 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
 
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    const maxSize = 2 * 1024 * 1024;
 
     if (selectedFile) {
       if (selectedFile.size > maxSize) {
@@ -28,30 +63,29 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
       setImagePreview(URL.createObjectURL(selectedFile));
     }
   };
-  
-  const handleUpdate =async() => {
+
+  const handleUpdate = async () => {
     const formData = new FormData();
-    formData.append('product_name', productData.product_name);
     formData.append('category', productData.category);
+    formData.append('subcategory', productData.subcategory);
+    formData.append('product_name', productData.product_name);
     formData.append('description', productData.description);
     formData.append('price', productData.price);
     formData.append('stock', productData.stock);
-    
-  
+
     if (selectedImage) {
       formData.append('image', selectedImage);
     }
 
     try {
       const token = localStorage.getItem('jwtToken');
-      const response = await axios.put(`http://localhost:3000/api/products/update/${product._id}`, formData, {
+      const response = await axios.put(`http://localhost:3000/api/products/addUpdate/update/${product._id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
         },
       });
       alert('Product updated successfully!');
-      // Update the UI without refresh
       onUpdate(response.data.product);
       setOpen(false);
     } catch (error) {
@@ -77,6 +111,34 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
         <DialogTitle>Update Product</DialogTitle>
         <DialogContent>
           <TextField
+            select
+            margin="dense"
+            name="category"
+            label="Category"
+            value={productData.category}
+            onChange={handleCategoryChange}
+            fullWidth
+          >
+            {categories.map((category) => (
+              <MenuItem key={category._id} value={category.name}>{category.name}</MenuItem>
+            ))}
+          </TextField>
+          
+          <TextField
+            select
+            margin="dense"
+            name="subcategory"
+            label="Sub-Category"
+            value={productData.subcategory}
+            onChange={handleSubcategoryChange}
+            fullWidth
+          >
+            {subcategories.map((subcategory) => (
+              <MenuItem key={subcategory._id} value={subcategory.name}>{subcategory.name}</MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
             autoFocus
             margin="dense"
             name="product_name"
@@ -85,14 +147,7 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
             onChange={handleInputChange}
             fullWidth
           />
-          <TextField
-            margin="dense"
-            name="category"
-            label="Category"
-            value={productData.category}
-            onChange={handleInputChange}
-            fullWidth
-          />
+          
           <TextField
             margin="dense"
             name="description"
@@ -101,6 +156,7 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
             onChange={handleInputChange}
             fullWidth
           />
+          
           <TextField
             margin="dense"
             name="price"
@@ -110,6 +166,7 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
             onChange={handleInputChange}
             fullWidth
           />
+          
           <TextField
             margin="dense"
             name="stock"
@@ -119,6 +176,7 @@ const UpdateProductDetails = ({ product, onUpdate}) => {
             onChange={handleInputChange}
             fullWidth
           />
+
           <input
             accept="image/*"
             type="file"

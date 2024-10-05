@@ -2,6 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import { useState } from 'react';
 import { TextField, Button,Card, CardContent, Container, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
 
 const AdminLogin = ({setIsLoggedIn}) =>{
 
@@ -10,6 +12,7 @@ const AdminLogin = ({setIsLoggedIn}) =>{
   const[usernameError, setUsernameError] = useState(false);
   const[passwordError, setPasswordError] = useState(false);
   const[error, setError] = useState('');
+  const Navigate = useNavigate();
 
   const handleLogin = async() =>{
 
@@ -37,6 +40,7 @@ const AdminLogin = ({setIsLoggedIn}) =>{
       const{token} = response.data;
       localStorage.setItem('jwtToken',token);
       setIsLoggedIn(true); 
+      Navigate('/landing-page');
       console.log('Login Successful', token)
     }
     catch(error){

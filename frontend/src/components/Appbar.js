@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, Typography, Button, Menu, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import AddProduct from './Admin/AddProduct';
+
 
 const Appbar = ({ isLoggedIn, setIsLoggedIn }) => {
   const navigate = useNavigate();
